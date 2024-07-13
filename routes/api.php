@@ -25,7 +25,7 @@ Route::group(['prefix' => 'user'], function (){
     Route::get('/detail', function (Request $request) {
         return $request->user();
     })->middleware('auth:sanctum');
-    Route::put('/update/{user}', [UserController::class, 'update'])->middleware('auth:sanctum') ;
+    Route::post('/update/{user}', [UserController::class, 'update'])->middleware('auth:sanctum') ;
     Route::delete('/destroy/{user}', [UserController::class, 'destroy'])->middleware('auth:sanctum') ; 
 });
 

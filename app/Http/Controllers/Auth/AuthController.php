@@ -15,10 +15,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
+            'fullname' => 'required|string',
+            'username' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|max:20',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'ktp_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'ktp_number' => 'nullable|string'
         ]);
     
         if ($validator->fails()) {
@@ -34,15 +37,22 @@ class AuthController extends Controller
         if ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
             $image_name = time() . '.' . $image->extension();
-            $image->move(public_path('images/menu'), $image_name);
-            $input['profile_image'] = 'images/menu/' . $image_name;
+            $image->move(public_path('images/profile'), $image_name);
+            $input['profile_image'] = 'images/profile/' . $image_name;
+        }
+
+        if ($request->hasFile('ktp_image')) {
+            $image = $request->file('ktp_image');
+            $image_name = time() . '.' . $image->extension();
+            $image->move(public_path('images/ktp'), $image_name);
+            $input['ktp_image'] = 'images/ktp/' . $image_name;
         }
     
         $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
     
         $success['token'] = $user->createToken('auth_token')->plainTextToken;
-        $success['name'] = $user->name;
+        $success['fullname'] = $user->fullname;
         
         $user->notify(new EmailVerificationNotification());
     
