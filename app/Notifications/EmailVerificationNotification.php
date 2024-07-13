@@ -23,7 +23,7 @@ class EmailVerificationNotification extends Notification
     {
         $this->message = 'Use the below code for verification process';
         $this->subject = 'Verification Needed';
-        $this->fromEmail = 'test@arfatest.com';
+        $this->fromEmail = 'sharper@skill.com';
         $this->mailer = 'smtp';
         $this->otp = new Otp;
     }
@@ -47,9 +47,15 @@ class EmailVerificationNotification extends Notification
         return (new MailMessage)
                  ->mailer('smtp')
                  ->subject($this->subject)
-                 ->greeting('Hello!'.$notifiable->name) 
+                 ->greeting('Hello! '.$notifiable->fullname) 
                  ->line($this->message)  
-                 ->line('code: '.$otp->token);
+                 ->line('code: '.$otp->token)
+                 ->line('If you did not request a verification code, no further action is required.')
+                 ->salutation('Thank you for using our application!')
+                 ->from($this->fromEmail)
+                 ->replyTo($this->fromEmail);
+
+
     }
 
     /**

@@ -13,35 +13,44 @@ class UserController extends Controller
 {
     public function update(Request $request, User $user)
 {
-    // Validate the incoming request
+    
     $validator = Validator::make($request->all(), [
-        'name'     => 'string',
-        'password' => 'string|min:8|max:20'
+        'fullname'     => 'string',
+        'username'     => 'string',
+        'profile_image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        'password'      => 'string|min:8|max:20'
     ]);
 
-    // Handle validation errors
     if ($validator->fails()) {
         return response()->json([
             'success' => false,
             'message' => 'Ada Kesalahan',
             'data'    => $validator->errors()
-        ], 422); // Use 422 Unprocessable Entity for validation errors
+        ], 422); 
     }
 
-    // Update user fields
-    $input = $request->only(['name', 'password']);
-    $input['password'] = bcrypt($input['password']); // Encrypt the password
-    $user->update($input); // Update the user model
+    $input = $request->all();
 
-    // Refresh the user model instance
-    $user->refresh();
+    if ($request->hasFile('profile_image')) {
+        $image = $request->file('profile_image');
+        $image_name = time() . '.' . $image->extension();
+        $image->move(public_path('images/profile'), $image_name);
+        $input['profile_image'] = 'images/profile/' . $image_name;
+    }
 
-    // Return successful response
+    if (isset($input['password'])) {
+        $input['password'] = bcrypt($input['password']); 
+    } else {
+        unset($input['password']);
+    }
+
+    $user->update($input); 
+
     return response()->json([
         'success' => true,
         'message' => 'Model updated successfully',
         'data'    => $user
-    ], 200); // Use 200 OK for a successful update
+    ], 200); 
 }
 
 public function destroy(User $user)
